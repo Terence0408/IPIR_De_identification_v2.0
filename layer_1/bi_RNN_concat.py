@@ -96,30 +96,30 @@ def what_d(runtimes = 1, renew =True, maxlen=100):
     if renew == True:
         print('Build model...')
         left = Sequential()
-        left.add(SimpleRNN(char_Y_01, input_shape=(char_X_010, char_X_001), activation='tanh',
+        left.add(SimpleRNN(char_Y_01/2, input_shape=(char_X_010, char_X_001), activation='tanh',
                            # inner_activation='sigmoid', dropout_W=0.5, dropout_U=0.5))
                            dropout_W=0.5, dropout_U=0.5))
         right = Sequential()
-        right.add(SimpleRNN(char_Y_01, input_shape=(char_X_010, char_X_001), activation='tanh',
+        right.add(SimpleRNN(char_Y_01/2, input_shape=(char_X_010, char_X_001), activation='tanh',
                             # inner_activation='sigmoid', dropout_W=0.5, dropout_U=0.5, go_backwards=True))
                             dropout_W=0.5, dropout_U=0.5, go_backwards=True))
         model = Sequential()
-        model.add(Merge([left, right], mode='sum'))
+        model.add(Merge([left, right], mode='concat'))
         model.compile('Adadelta', 'MSE', metrics=['accuracy'])
         model.fit([X, X], y, batch_size=512, nb_epoch=1)
-        model.save(path + "layer_1/bi_RNN_merge_" + str(file_id) + ".pk")
+        model.save(path + "layer_1/bi_RNN_concat_" + str(file_id) + ".pk")
 
 
     # Not first time: build the model: a bidirectional LSTM
 
     print('Load model...')
-    model = load_model(path+"layer_1/bi_RNN_merge_" + str(file_id) + ".pk")
+    model = load_model(path+"layer_1/bi_RNN_concat_" + str(file_id) + ".pk")
     for j in range(0,runtimes-1):
         print('Build model...')
         model.fit([X,X], y,
                   batch_size=512,
                   nb_epoch=1)
-        model.save(path + "layer_1/bi_RNN_merge_" + str(file_id) + ".pk")
+        model.save(path + "layer_1/bi_RNN_concat_" + str(file_id) + ".pk")
 
 
     # Test cosine similarity, train set
@@ -137,7 +137,7 @@ def what_d(runtimes = 1, renew =True, maxlen=100):
 
         cos.append(1 - spatial.distance.cosine(map_LSTM, map_GloVe))
     f = open(path+"layer_1/cosine.txt", 'a')
-    f.write("20 times bi_RNN_merge" + str(file_id) + " cosine similarity: "+str(sum(cos)/len(cos))+"\n")
+    f.write("20 times bi_RNN_concat" + str(file_id) + " cosine similarity: "+str(sum(cos)/len(cos))+"\n")
     f.close()
 
 
@@ -166,7 +166,7 @@ def what_d(runtimes = 1, renew =True, maxlen=100):
 
             cos.append(1 - spatial.distance.cosine(map_LSTM, map_GloVe))
     f = open(path+"layer_1/cosine.txt", 'a')
-    f.write("20 times bi_RNN_merge" + str(file_id) + " misspelling cosine similarity : "+str(sum(cos)/len(cos))+", len: "+str(len(cos))+"\n")
+    f.write("20 times bi_RNN_concat" + str(file_id) + " misspelling cosine similarity : "+str(sum(cos)/len(cos))+", len: "+str(len(cos))+"\n")
     f.close()
 
 what_d(runtimes =  20, renew =True,  maxlen = 18)
