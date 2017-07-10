@@ -32,28 +32,41 @@ chars= [' ', '0', '1', '2', '3', '4', '5', '6', '7',
 char_indices = dict((c, i) for i, c in enumerate(chars))
 indices_char = dict((i, c) for i, c in enumerate(chars))
 
-file_id = 1
-def readfile(file_id = 1):
+
+def readfile(file_id = 2):
 
     if file_id == 1:
         # Read and arrange data set into x, y type.
         text_file = open(path + "glove.6B.100d.txt", 'r')
         glove_text = text_file.readlines()
 
+        word_lens = 400000
         char_X_100 = 399488  # words: 399488
         char_X_010 = 43  # max word length: 43
         char_X_001 = 37  # chars: 37
         char_Y_10 = 399488  # words: 399488
         char_Y_01 = 100  # encode word length: 100
 
+    if file_id == 2:
+        # Read and arrange data set into x, y type.
+        text_file = open(path + "glove.twitter.27B.100d.txt", 'r')
+        glove_text = text_file.readlines()
 
-    return [glove_text, [char_X_100, char_X_010, char_X_001, char_Y_10, char_Y_01]]
+        word_lens = 1193514
+        char_X_100 = 695677  # words: 695677
+        char_X_010 = 140  # max word length: 140
+        char_X_001 = 37  # chars: 37
+        char_Y_10 = 695677  # words: 695677
+        char_Y_01 = 100  # encode word length: 100
+
+
+    return [glove_text, [char_X_100, char_X_010, char_X_001, char_Y_10, char_Y_01],[word_lens]]
 
 
 
-def what_d(runtimes = 1, renew =True, maxlen=100):
+def what_d(runtimes = 1, renew =True, maxlen=100, file_id=2):
 
-    [glove,[char_X_100, char_X_010, char_X_001, char_Y_10, char_Y_01]] = readfile()
+    [glove,[char_X_100, char_X_010, char_X_001, char_Y_10, char_Y_01],[word_lens]] = readfile(file_id=file_id)
 
     char_X_010 = min(char_X_010, maxlen)
 
@@ -62,7 +75,7 @@ def what_d(runtimes = 1, renew =True, maxlen=100):
     y = np.zeros((char_Y_10, char_Y_01 ), dtype=np.float64)
 
     ii = 0
-    for i in range(0, 400000):
+    for i in range(0, word_lens):
         ttt = glove[i].split()
         ttt_lens = len(ttt)
         lists = ["".join(ttt[0:ttt_lens - char_Y_01])] + ttt[ttt_lens - char_Y_01:]

@@ -21,7 +21,7 @@ import nltk
 import re
 import h5py # It needs at save keras model
 from keras.models import Sequential, load_model
-from keras.layers import LSTM
+from keras.layers import GRU, Dense
 from keras.engine.topology import Merge
 from scipy import spatial
 
@@ -108,30 +108,31 @@ def what_d(runtimes = 1, renew =True, maxlen=100, file_id=2):
     if renew == True:
         print('Build model...')
         left = Sequential()
-        left.add(LSTM(char_Y_01, input_shape=(char_X_010, char_X_001), activation='tanh',
+        left.add(GRU(char_Y_01, input_shape=(char_X_010, char_X_001), activation='tanh',
                            inner_activation='sigmoid', dropout_W=0.5, dropout_U=0.5))
                            #dropout_W=0.5, dropout_U=0.5))
         right = Sequential()
-        right.add(LSTM(char_Y_01, input_shape=(char_X_010, char_X_001), activation='tanh',
+        right.add(GRU(char_Y_01, input_shape=(char_X_010, char_X_001), activation='tanh',
                             inner_activation='sigmoid', dropout_W=0.5, dropout_U=0.5, go_backwards=True))
                             #dropout_W=0.5, dropout_U=0.5, go_backwards=True))
         model = Sequential()
         model.add(Merge([left, right], mode='sum'))
+        model.add(Dense((char_Y_01), activation='sigmoid'))
         model.compile('Adadelta', 'MSE', metrics=['accuracy'])
         model.fit([X, X], y, batch_size=512, nb_epoch=1)
-        model.save(path + "layer_1/bi_LSTM_merge_" + str(file_id) + ".pk")
+        model.save(path + "layer_2/bi_GRU_merge__dense" + str(file_id) + ".pk")
 
 
     # Not first time: build the model: a bidirectional LSTM
 
     print('Load model...')
-    model = load_model(path+"layer_1/bi_LSTM_merge_" + str(file_id) + ".pk")
+    model = load_model(path+"layer_2/bi_GRU_merge__dense" + str(file_id) + ".pk")
     for j in range(0,runtimes-1):
         print('Build model...')
         model.fit([X,X], y,
                   batch_size=512,
                   nb_epoch=1)
-        model.save(path + "layer_1/bi_LSTM_merge_" + str(file_id) + ".pk")
+        model.save(path + "layer_2/bi_GRU_merge__dense" + str(file_id) + ".pk")
 
 
     # Test cosine similarity, train set
@@ -148,8 +149,8 @@ def what_d(runtimes = 1, renew =True, maxlen=100, file_id=2):
         map_GloVe = y[i]
 
         cos.append(1 - spatial.distance.cosine(map_LSTM, map_GloVe))
-    f = open(path+"layer_1/cosine.txt", 'a')
-    f.write("20 times bi_LSTM_merge" + str(file_id) + " cosine similarity: "+str(sum(cos)/len(cos))+"\n")
+    f = open(path+"layer_2/cosine.txt", 'a')
+    f.write("20 times bi_GRU_merge__dense" + str(file_id) + " cosine similarity: "+str(sum(cos)/len(cos))+"\n")
     f.close()
 
 
@@ -177,8 +178,8 @@ def what_d(runtimes = 1, renew =True, maxlen=100, file_id=2):
             map_GloVe = y[i]
 
             cos.append(1 - spatial.distance.cosine(map_LSTM, map_GloVe))
-    f = open(path+"layer_1/cosine.txt", 'a')
-    f.write("20 times bi_LSTM_merge" + str(file_id) + " misspelling cosine similarity : "+str(sum(cos)/len(cos))+", len: "+str(len(cos))+"\n")
+    f = open(path+"layer_2/cosine.txt", 'a')
+    f.write("20 times bi_GRU_merge__dense" + str(file_id) + " misspelling cosine similarity : "+str(sum(cos)/len(cos))+", len: "+str(len(cos))+"\n")
     f.close()
 
 what_d(runtimes =  20, renew =True,  maxlen = 18)
