@@ -59,12 +59,29 @@ def readfile(file_id = 2):
         char_Y_10 = 695677  # words: 695677
         char_Y_01 = 100  # encode word length: 100
 
+        word_lens = 1193514
+        char_X_100 = 695677  # words: 695677
+        char_X_010 = 140  # max word length: 140
+        char_X_001 = 37  # chars: 37
+        char_Y_10 = 695677  # words: 695677
+        char_Y_01 = 100  # encode word length: 100
 
-    return [glove_text, [char_X_100, char_X_010, char_X_001, char_Y_10, char_Y_01],[word_lens]]
+    if file_id == 3:
+        # Read and arrange data set into x, y type.
+        text_file = open(path + "glove.840B.300d.txt", 'r')
+        glove_text = text_file.readlines()
+
+        word_lens = 2196017
+        char_X_100 = 2193429  # words: 695677
+        char_X_010 = 60  # max word length: >1000
+        char_X_001 = 37  # chars: 37
+        char_Y_10 = 2193429  # words: 695677
+        char_Y_01 = 300  # encode word length: 100
+
+    return [glove_text, [char_X_100, char_X_010, char_X_001, char_Y_10, char_Y_01], [word_lens]]
 
 
-
-def what_d(runtimes = 1, renew =True, maxlen=100, file_id=2):
+def what_d(runtimes=1, renew=True, maxlen=100, file_id=3):
 
     [glove,[char_X_100, char_X_010, char_X_001, char_Y_10, char_Y_01],[word_lens]] = readfile(file_id=file_id)
 
@@ -181,6 +198,6 @@ def what_d(runtimes = 1, renew =True, maxlen=100, file_id=2):
     f.write("20 times bi_LSTM_merge" + str(file_id) + " misspelling cosine similarity : "+str(sum(cos)/len(cos))+", len: "+str(len(cos))+"\n")
     f.close()
 
-what_d(runtimes =  20, renew =True,  maxlen = 18)
+what_d(runtimes =  20, renew =True,  maxlen = 18, file_id=3)
 
 print ("end")
